@@ -1,0 +1,21 @@
+# local dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Python caches
+__pycache__/
+.pytest_cache/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# local environment
+.env
+.env.*
+
+# OS/editor files
+.DS_Store
+Thumbs.db

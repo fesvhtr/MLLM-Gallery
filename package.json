@@ -1,0 +1,22 @@
+{
+  "name": "mllm-gallery-local",
+  "version": "0.2.0",
+  "private": true,
+  "description": "A local React and Vite MLLM architecture gallery.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4173",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "5.4.21",
+    "typescript": "5.6.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "motion": "12.23.24",
+    "lucide-react": "0.468.0"
+  },
+  "devDependencies": {}
+}
