@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MLLM Gallery architecture definition v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "category",
+    "number",
+    "subtitle",
+    "version",
+    "evidence",
+    "description",
+    "note",
+    "stages",
+    "nodes",
+    "edges",
+    "sources"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "title": { "type": "string", "minLength": 1 },
+    "checkpoint": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "number": { "type": "string", "pattern": "^[0-9]{2}$" },
+    "subtitle": { "type": "string" },
+    "version": { "const": "0.1" },
+    "evidence": {
+      "enum": ["Reference schematic", "Source-verified architecture"]
+    },
+    "description": { "type": "string" },
+    "note": { "type": "string" },
+    "notation": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "prefixItems": [{ "type": "string" }, { "type": "string" }],
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "url", "location"],
+        "properties": {
+          "title": { "type": "string" },
+          "url": { "type": "string", "pattern": "^https://" },
+          "location": { "type": "string" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "evidence": { "const": "Source-verified architecture" }
+        }
+      },
+      "then": {
+        "properties": { "sources": { "type": "array", "minItems": 1 } }
+      }
+    }
+  ],
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "subtitle",
+        "column",
+        "row",
+        "symbol",
+        "input",
+        "output",
+        "description",
+        "properties"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "kind": { "enum": ["input", "operation", "stack", "tokens", "output"] },
+        "label": { "type": "string", "minLength": 1, "maxLength": 24 },
+        "subtitle": { "type": "string", "maxLength": 36 },
+        "column": { "type": "integer", "minimum": 0 },
+        "row": { "type": "integer", "minimum": 0 },
+        "symbol": {
+          "enum": [
+            "image",
+            "text",
+            "tokens",
+            "layers",
+            "projector",
+            "patches",
+            "norm",
+            "output",
+            "mixed",
+            "matrix"
+          ]
+        },
+        "input": { "type": "string" },
+        "output": { "type": "string" },
+        "description": { "type": "string" },
+        "repeat": { "type": "string", "minLength": 1 },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "type": "string", "maxLength": 30 }
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [{ "type": "string" }, { "type": "string" }],
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "target",
+        "label",
+        "kind",
+        "sourcePort",
+        "targetPort"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "label": { "type": "string", "maxLength": 32 },
+        "kind": { "enum": ["data", "conditioning"] },
+        "sourcePort": { "const": "out" },
+        "targetPort": { "enum": ["in", "aux"] }
+      }
+    }
+  }
+}

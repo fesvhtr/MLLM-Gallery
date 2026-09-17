@@ -546,6 +546,29 @@ h1 {
   text-transform: uppercase;
 }
 
+.architecture-reference-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  text-transform: none;
+  color: #191919;
+  font-size: 11px;
+}
+
+.architecture-reference-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.studio-loading {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  color: #707070;
+  font-size: 13px;
+}
+
 .section-main {
   display: grid;
   gap: 16px;
@@ -598,21 +621,16 @@ h2 {
   gap: 8px;
 }
 
-.gallery-kicker {
+.gallery-title-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 38px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
+  gap: 12px 24px;
 }
 
 .gallery-head {
   display: grid;
-  max-width: 980px;
   gap: 22px;
 }
 
@@ -683,6 +701,30 @@ h2 {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.55;
+}
+
+.gallery-model-card {
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.gallery-model-card h3 {
+  letter-spacing: 0;
+}
+
+.gallery-model-card .gallery-model-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  color: #191919;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.gallery-model-card:focus-visible {
+  outline: 2px solid #191919;
+  outline-offset: 4px;
 }
 
 .section-card {

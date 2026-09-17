@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { motion } from "motion/react";
+import { ArrowUpRight } from "lucide-react";
 import "./styles.css";
+
+const ArchitectureStudio = lazy(() => import("./architecture/ArchitectureStudio"));
+const ModelArchitecture = lazy(() => import("./architecture/ModelArchitecture"));
 
 const backgroundVideoUrl = "";
 
@@ -11,7 +15,6 @@ const navItems = [
   { label: "Vision Encoders", id: "vision-encoders" },
   { label: "Modular VLMs", id: "modular-vlms" },
   { label: "Native MLLMs", id: "native-mllms" },
-  { label: "Compare", id: "compare" },
   { label: "About Me", href: "https://www.sczhang.com", external: true }
 ];
 
@@ -45,20 +48,18 @@ const models = [
 const sections = [
   {
     id: "vision-encoders",
-    eyebrow: "01 / Components",
     title: "Vision Encoders",
     summary:
       "The visual front-end that turns pixels, pages, frames, and regions into tokens a language system can consume.",
     metrics: ["CLIP / SigLIP", "EVA / DINOv2", "ViT / SAM-style"],
     cards: [
-      ["Contrastive towers", "CLIP and SigLIP remain the default foundation for fast image-language alignment."],
+      ["CLIP", "ViT-L/14. Independent image and text encoders, aligned in a shared embedding space.", "#/models/clip"],
       ["High-resolution vision", "Dynamic tiling, native aspect ratios, and patch budgets decide how much visual detail survives."],
       ["Specialized perception", "Document, grounding, and segmentation encoders can be compared by token density and spatial fidelity."]
     ]
   },
   {
     id: "modular-vlms",
-    eyebrow: "02 / Families",
     title: "Modular VLMs",
     summary:
       "The classic MLLM stack: a vision encoder, a bridge layer, and a pretrained language model trained into one interface.",
@@ -71,7 +72,6 @@ const sections = [
   },
   {
     id: "native-mllms",
-    eyebrow: "03 / Native Systems",
     title: "Native MLLMs",
     summary:
       "Models that treat multimodal tokens as a first-class language, rather than only attaching vision after text pretraining.",
@@ -80,19 +80,6 @@ const sections = [
       ["Unified token streams", "Image patches, visual codes, and text can share one autoregressive or mixed-token modeling path."],
       ["Early fusion", "The model learns multimodal structure deeper in the stack instead of relying on a shallow connector."],
       ["Harder to inspect", "Closed native systems often expose strong capabilities but fewer architecture details than modular models."]
-    ]
-  },
-  {
-    id: "compare",
-    eyebrow: "04 / Workspace",
-    title: "Compare",
-    summary:
-      "A clean comparison surface for architecture, modality support, openness, scale, training recipe, and serving cost.",
-    metrics: ["Architecture", "Modality", "Training"],
-    cards: [
-      ["Architecture filters", "Projector, Q-Former, resampler, cross-attention, visual expert, native tokens, and MoE."],
-      ["Capability filters", "Single image, multi-image, video, document, OCR, grounding, coordinates, and long context."],
-      ["Operational filters", "Open weights, license class, parameter scale, image-token budget, and deployment footprint."]
     ]
   }
 ];
@@ -270,6 +257,7 @@ function FooterHero({ onNavigate }) {
 }
 
 function CategoryGallery({ section }) {
+  const referenceIds = { "vision-encoders": "vision-encoder", "modular-vlms": "modular-vlm", "native-mllms": "native-mllm" };
   return (
     <motion.section
       className="gallery-view"
@@ -278,12 +266,13 @@ function CategoryGallery({ section }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease }}
     >
-      <div className="gallery-kicker">
-        <span>{section.eyebrow}</span>
-      </div>
-
       <div className="gallery-head">
-        <h2>{section.title}</h2>
+        <div className="gallery-title-row">
+          <h2>{section.title}</h2>
+          <a className="architecture-reference-link" href={`#/diagram-system/${referenceIds[section.id]}`}>
+            Architecture reference <ArrowUpRight size={14} />
+          </a>
+        </div>
         <p>{section.summary}</p>
       </div>
 
@@ -299,37 +288,57 @@ function CategoryGallery({ section }) {
       </div>
 
       <div className="gallery-grid">
-        {section.cards.map(([title, copy], index) => (
-          <motion.article
-            className="gallery-card"
+        {section.cards.map(([title, copy, href], index) => {
+          const Card = href ? motion.a : motion.article;
+          return <Card
+            className={`gallery-card ${href ? "gallery-model-card" : ""}`}
             key={title}
+            href={href}
+            aria-label={href ? `${title} architecture` : undefined}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.08 * index, ease }}
             whileHover={{ y: -6 }}
           >
-            <span>{String(index + 1).padStart(2, "0")}</span>
+            <span>{href ? "OPENAI / 2021" : String(index + 1).padStart(2, "0")}</span>
             <h3>{title}</h3>
             <p>{copy}</p>
-          </motion.article>
-        ))}
+            {href && <span className="gallery-model-link">Architecture <ArrowUpRight size={15} /></span>}
+          </Card>;
+        })}
       </div>
     </motion.section>
   );
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("home");
+  const pageFromHash = () => window.location.hash.replace(/^#\/?/, "") || "home";
+  const [currentPage, setCurrentPage] = useState(pageFromHash);
+  useEffect(() => {
+    const onHashChange = () => setCurrentPage(pageFromHash());
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+  const isDiagramPage = currentPage === "diagram-system" || currentPage.startsWith("diagram-system/");
+  const isModelPage = currentPage.startsWith("models/");
   const selectedSection =
     sections.find((section) => section.id === currentPage) || sections[1];
-  const navigateHome = () => setCurrentPage("home");
-  const navigateTo = (id) => setCurrentPage(id);
+  const navigateTo = (id) => { window.location.hash = id === "home" ? "/" : `/${id}`; };
+  const navigateHome = () => navigateTo("home");
 
   return (
     <>
-      <Navbar currentPage={currentPage} onNavigate={navigateTo} onHome={navigateHome} />
+      <Navbar currentPage={isModelPage ? "vision-encoders" : currentPage} onNavigate={navigateTo} onHome={navigateHome} />
       <main>
-        {currentPage === "home" ? (
+        {isModelPage ? (
+          <Suspense fallback={<div className="studio-loading" role="status">Loading architecture...</div>}>
+            <ModelArchitecture modelId={currentPage.split("/")[1]} />
+          </Suspense>
+        ) : isDiagramPage ? (
+          <Suspense fallback={<div className="studio-loading" role="status">Loading architecture...</div>}>
+            <ArchitectureStudio templateId={currentPage.split("/")[1]} onTemplateChange={(id) => navigateTo(`diagram-system/${id}`)} />
+          </Suspense>
+        ) : currentPage === "home" ? (
           <section id="top" className="landing">
             <BackgroundLayer />
 
